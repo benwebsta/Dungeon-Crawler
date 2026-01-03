@@ -1259,13 +1259,10 @@ async function showClassSelect() {
 	`;
 
 
-    div.onclick = () => startNewGame(data);
-
     container.appendChild(div);
     attachSwipeFlip(div);
 
     div.addEventListener("click", () => {
-      // If the user just swiped to flip, don't start game
       if (div.dataset.justSwiped) return;
       startNewGame(data);
     });
