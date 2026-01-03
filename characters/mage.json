@@ -1,0 +1,9 @@
+{
+  "name": "Mage",
+  "hp": 8,
+  "attack": 1,
+  "passive": "On room entry, draw 2 cards.",
+  "ability": "Discard 1 card to deal 3 damage, take 1 damage.",
+  "slots": { "weapon": 1, "armor": 1 },
+  "equipment": { "weapon": null, "armor": null, "any": null }
+}

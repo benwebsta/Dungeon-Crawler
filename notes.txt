@@ -1,0 +1,26 @@
+Notes / Current State / To Do:
+
+1. Game state has animations and HP bars. 
+2. Remaining To Do:
+    a. Add Game logic:
+        1. 3 floors, then boss (need to create boss)
+        2. 5 creature kills per floor 
+            a. Floor 1 (Common 65%, Rare 20%, Unique 10%, Legendary 5%)
+            b. Floor 2 (Common 45%, Rare 30%, Unique 15%, Legendary 10%)
+            c. Floor 3 (Common 15%, Rare 45%, Unique 25%, Legendary 15%)
+        3. Add random draw for creatures
+        4. Add rarities for consumables
+        5. Add passive logic for warrior
+        6. Add active button and logic for warrior.
+        7. Add passive / active for other classes
+        8. Add and test classless (3 items)
+        9. Continue to update UI and animations
+        10. Add logic for consumables (damage to creatures, etc.)
+    b. Once DONE with logic
+        1. Add images for all cards (creatures, consumables, equips)
+    c. Other Notes and Misc to do:
+        1. Add special abilities / custom creature stuff.
+        2. Add special item abilities ?
+        3. Items that can work together?
+        4. Items that heal on hit
+        5. 

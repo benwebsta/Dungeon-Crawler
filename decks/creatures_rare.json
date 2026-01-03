@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Goblin Scout",
+    "rarity": "Rare",
+    "hp": 7,
+    "attack": 2,
+    "description": "Quick and opportunistic."
+  },
+  {
+    "name": "Wolf",
+    "rarity": "Rare",
+    "hp": 8,
+    "attack": 2,
+    "description": "Bites hard, but doesn’t last long."
+  },
+  {
+    "name": "Bandit",
+    "rarity": "Rare",
+    "hp": 9,
+    "attack": 2,
+    "description": "Knows where to strike, not how to endure."
+  },
+  {
+    "name": "Fire Imp",
+    "rarity": "Rare",
+    "hp": 7,
+    "attack": 3,
+    "description": "Small, spicy, dangerous in short bursts."
+  }
+]

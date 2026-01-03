@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Ogre Brute",
+    "rarity": "Epic",
+    "hp": 12,
+    "attack": 3,
+    "description": "Big swings, slow brain."
+  },
+  {
+    "name": "Wraith",
+    "rarity": "Epic",
+    "hp": 10,
+    "attack": 4,
+    "description": "Chilling hits—harder, but less durable."
+  },
+  {
+    "name": "Armored Knight",
+    "rarity": "Epic",
+    "hp": 13,
+    "attack": 3,
+    "description": "Steady and disciplined."
+  },
+  {
+    "name": "Troll",
+    "rarity": "Epic",
+    "hp": 14,
+    "attack": 3,
+    "description": "Hard to put down, not super lethal."
+  }
+]

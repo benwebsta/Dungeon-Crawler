@@ -1,0 +1,9 @@
+{
+  "name": "Warrior",
+  "hp": 12,
+  "attack": 2,
+  "passive": "Reduce first damage each room by 1",
+  "ability": "Once per room, when you play a card, your attack hits twice",
+  "slots": { "weapon": 1, "armor": 1 },
+  "equipment": { "weapon": null, "armor": null, "any": null }
+}

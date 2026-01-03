@@ -1,0 +1,9 @@
+{
+  "name": "Archer",
+  "hp": 10,
+  "attack": 2,
+  "passive": "Always wins initiative",
+  "ability": "Discard 1 card → deal 2 damage before combat.",
+  "slots": { "weapon": 1, "armor": 1 },
+  "equipment": { "weapon": null, "armor": null, "any": null }
+}

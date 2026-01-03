@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Slime",
+    "rarity": "Common",
+    "hp": 5,
+    "attack": 1,
+    "description": "A wobbling blob that barely hurts."
+  },
+  {
+    "name": "Rat",
+    "rarity": "Common",
+    "hp": 4,
+    "attack": 1,
+    "description": "Fast, annoying, and fragile."
+  },
+  {
+    "name": "Bat",
+    "rarity": "Common",
+    "hp": 4,
+    "attack": 2,
+    "description": "Flutters in close, then retreats."
+  },
+  {
+    "name": "Skeleton",
+    "rarity": "Common",
+    "hp": 6,
+    "attack": 1,
+    "description": "A clattering bag of bones."
+  }
+]

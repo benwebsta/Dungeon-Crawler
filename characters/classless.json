@@ -1,0 +1,9 @@
+{
+  "name": "Classless",
+  "hp": 8,
+  "attack": 1,
+  "passive": "Adaptable: Can equip any item in the 'any' slot",
+  "ability": "Flex: Choose to boost attack or HP once per room",
+  "slots": { "weapon": 1, "armor": 1, "any": 1 },
+  "equipment": { "weapon": null, "armor": null, "any": null }
+}

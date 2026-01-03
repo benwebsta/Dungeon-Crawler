@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="classSelect" class="screen active">
+	  <h1>Choose Your Class</h1>
+	  <div id="classes"></div>
+	</div>
+
+	<div id="gameScreen" class="screen">
+
+	  <!-- BATTLEFIELD (top 2/3) -->
+	  <div id="battlefield">
+
+		<!-- TOP HALF: Monster -->
+		<div class="half top-half">
+		  <div class="panel info-panel" id="monsterInfo">
+			<div class="title" id="monsterName">Monster Name</div>
+			<div class="stats" id="monsterStats">ATK 0 • HP 0/0</div>
+			<div class="desc" id="monsterDesc">Monster description...</div>
+		  </div>
+
+		  
+		  <div class="panel sprite-panel" id="monsterSpritePanel">
+				<div class="sprite-name" id="monsterSpriteName">Monster</div>
+
+				<div class="sprite monster-sprite" id="monsterSprite"></div>
+
+				<div class="hpbar" id="monsterHpBar" aria-label="Monster HP">
+					<div class="hpbar-fill" id="monsterHpFill"></div>
+					<div class="hpbar-text" id="monsterHpText">0/0</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- BOTTOM HALF: Player -->
+		<div class="half bottom-half">
+			<div class="panel sprite-panel" id="playerSpritePanel">
+				<div class="sprite-name" id="playerSpriteName">Player</div>
+
+				<div class="sprite player-sprite" id="playerSprite"></div>
+
+				<div class="hpbar" id="playerHpBar" aria-label="Player HP">
+					<div class="hpbar-fill" id="playerHpFill"></div>
+					<div class="hpbar-text" id="playerHpText">0/0</div>
+				</div>
+			</div>
+
+
+		  <div class="panel info-panel" id="playerInfo">
+			<div class="title" id="playerName">Your Class</div>
+			<div class="stats" id="playerStats">ATK 0 • DEF 0 • HP 0/0</div>
+			<div class="desc" id="playerDesc">
+			  <div><strong>Passive:</strong> <span id="playerPassive">—</span></div>
+			  <div><strong>Ability:</strong> <span id="playerAbility">—</span></div>
+
+				<div class="gear" id="playerGear">
+					<div id="equippedSlots" class="equipped-slots">
+						<div id="equip-slot-weapon" class="equip-slot" data-slot="weapon"></div>
+						<div id="equip-slot-armor"  class="equip-slot" data-slot="armor"></div>
+						<div id="equip-slot-any"    class="equip-slot equip-slot-any" data-slot="any" style="display:none;"></div>
+					</div>
+				</div>	
+
+			</div>
+		  </div>
+		</div>
+
+	  </div>
+	  
+	  <!-- Attack button: left side, vertically centered -->
+		<button id="attackBtn" class="ui-btn attack-btn">
+		  ATTACK
+		</button>
+
+		<input type="range" min="0" max="1" step="0.05" value="0.5" id="sfxVolume">
+
+		<!-- Reset button: bottom center, small -->
+		<button id="resetGame" class="ui-btn reset-btn">
+		  Reset
+		</button>
+
+	  <!-- HAND (bottom 1/3) -->
+	  <div id="handBar">
+  <div class="hand-title">Player Hand</div>
+  <div id="hand"></div>
+</div>
+
+	</div>
+
+	
+<div id="discard-overlay" class="overlay hidden">
+  <div class="overlay-content">
+    <h3>Discard Cards</h3>
+    <p>You have more than 2 cards. Please choose which to discard.</p>
+    <div id="discard-hand" class="hand"></div>
+  </div>
+</div>
+
+
+<script src="game.js"></script>
+</body>
+</html>

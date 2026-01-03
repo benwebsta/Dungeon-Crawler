@@ -1,0 +1,30 @@
+[
+ {
+    "name": "Ancient Dragon",
+    "rarity": "Legendary",
+    "hp": 18,
+    "attack": 5,
+    "description": "A true boss—still beatable."
+  },
+  {
+    "name": "Lich King",
+    "rarity": "Legendary",
+    "hp": 16,
+    "attack": 6,
+    "description": "Deadly magic and cruel intent."
+  },
+  {
+    "name": "Demon Champion",
+    "rarity": "Legendary",
+    "hp": 17,
+    "attack": 6,
+    "description": "Relentless and brutal."
+  },
+  {
+    "name": "Colossal Golem",
+    "rarity": "Legendary",
+    "hp": 20,
+    "attack": 4,
+    "description": "Huge HP, lower damage—endurance fight."
+  }
+]

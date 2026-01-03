@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Knightbreaker Blade",
+    "type": "weapon",
+    "attack": 5,
+    "description": "A blade designed to pierce heavy armor.",
+    "rarity": "Epic"
+  },
+  {
+    "name": "Runed Warhammer",
+    "type": "weapon",
+    "attack": 6,
+    "description": "A hammer etched with ancient runes that amplify impact.",
+    "rarity": "Epic"
+  },
+  {
+    "name": "Guardian Plate",
+    "type": "armor",
+    "armor": 5,
+    "description": "Heavy plate armor worn by elite defenders.",
+    "rarity": "Epic"
+  },
+  {
+    "name": "Amulet of the Sentinel",
+    "type": "armor",
+    "armor": 4,
+    "description": "A glowing amulet that strengthens defensive instincts.",
+    "rarity": "Epic"
+  }
+]

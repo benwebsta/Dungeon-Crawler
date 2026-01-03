@@ -1,0 +1,31 @@
+[
+  {
+    "name": "Dragonfang Greatsword",
+    "type": "weapon",
+    "attack": 8,
+    "description": "Forged from the fang of an ancient dragon. It hums with power.",
+    "rarity": "Legendary"
+  },
+  {
+    "name": "Worldsplitter Axe",
+    "type": "weapon",
+    "attack": 9,
+    "description": "Each swing feels capable of shattering mountains.",
+    "rarity": "Legendary"
+  },
+  {
+    "name": "Aegis of Eternity",
+    "type": "armor",
+    "armor": 7,
+    "description": "A legendary armor said to be unbreakable.",
+    "rarity": "Legendary"
+  },
+  {
+    "name": "Crown of the Immortal",
+    "type": "armor",
+    "armor": 6,
+    "attack": 2,
+    "description": "A mythical crown granting both power and protection.",
+    "rarity": "Legendary"
+  }
+]

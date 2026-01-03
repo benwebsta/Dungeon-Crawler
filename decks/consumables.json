@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Healing Potion",
+    "type": "consumable",
+    "heal": 5,
+    "description": "Restores 5 HP when used."
+  },
+  {
+    "name": "Greater Healing Potion",
+    "type": "consumable",
+    "heal": 10,
+    "description": "Restores 10 HP when used."
+  },
+  {
+    "name": "Fire Bomb",
+    "type": "consumable",
+    "damage": 4,
+    "description": "Deals 4 damage to the enemy."
+  },
+  {
+    "name": "Ice Bomb",
+    "type": "consumable",
+    "damage": 3,
+    "description": "Deals 3 damage and slows the enemy."
+  }
+]

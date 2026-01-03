@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Rusty Sword",
+    "type": "weapon",
+    "attack": 1,
+    "description": "An old sword with a dulled edge. Better than bare hands.",
+    "rarity": "Common"
+  },
+  {
+    "name": "Wooden Spear",
+    "type": "weapon",
+    "attack": 2,
+    "description": "A simple spear carved from oak.",
+    "rarity": "Common"
+  },
+  {
+    "name": "Cloth Armor",
+    "type": "armor",
+    "armor": 1,
+    "description": "Basic cloth armor offering minimal protection.",
+    "rarity": "Common"
+  },
+  {
+    "name": "Leather Vest",
+    "type": "armor",
+    "armor": 2,
+    "description": "Worn leather that absorbs light blows.",
+    "rarity": "Common"
+  }
+]

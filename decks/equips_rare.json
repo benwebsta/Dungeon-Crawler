@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Iron Sword",
+    "type": "weapon",
+    "attack": 3,
+    "description": "A well-balanced iron sword favored by soldiers.",
+    "rarity": "Rare"
+  },
+  {
+    "name": "Steel Axe",
+    "type": "weapon",
+    "attack": 4,
+    "description": "A heavy axe that delivers crushing blows.",
+    "rarity": "Rare"
+  },
+  {
+    "name": "Chainmail",
+    "type": "armor",
+    "armor": 3,
+    "description": "Interlocking rings provide solid protection.",
+    "rarity": "Rare"
+  },
+  {
+    "name": "Ring of Strength",
+    "type": "armor",
+    "attack": 2,
+    "description": "A forged ring that enhances physical power.",
+    "rarity": "Rare"
+  }
+]
