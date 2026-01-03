@@ -44,45 +44,48 @@ button {
 .equipped-slots{
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 10px;
 }
 
-/* Slot container centers its contents */
+/* Slot container: bigger and fills space */
 .equip-slot{
-  min-height: 95px;
+  min-height: 150px;              /* bigger */
   border: 2px dashed #555;
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 12px;
+  padding: 10px;
   background: #141414;
 
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;           /* let card fill */
+  justify-content: stretch;
 }
 
-/* Any slot spans full width (you already have this) */
-.equip-slot-any{
-  grid-column: 1 / -1;
-}
-
-/* Make the embedded “hand-card” look smaller in equipped slots */
+/* Make the embedded hand-card fill the slot */
 .equip-slot .hand-card{
-  width: 92%;
-  max-width: 220px;
-  font-size: 0.92em;
-  line-height: 1.1;
+  width: 100%;
+  height: 100%;
   margin: 0;
-  transform: scale(0.92);
-  transform-origin: center;
+  transform: none;               /* ✅ remove scaling */
+  font-size: 16px;               /* bigger text */
+  line-height: 1.2;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
-/* Slightly reduce spacing inside the card when embedded */
+/* More readable equipped description */
 .equip-slot .hand-card .description{
-  display: block;
-  margin-top: 4px;
-  font-size: 0.9em;
-  opacity: 0.9;
+  margin-top: 8px;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+
+/* Any slot spans full width ONLY when classless */
+.equipped-slots.has-any .equip-slot-any{
+  grid-column: 1 / -1;
 }
 
 /* Empty slot label centered */
@@ -148,7 +151,10 @@ button {
 .screen.hidden {
   display: none;
 }
-body { margin: 0; }
+body { 
+  margin: 0; 
+  font-size: 16px;
+}
 
 .screen {
   position: fixed;
@@ -432,24 +438,54 @@ body { margin: 0; }
   box-sizing: border-box;
 }
 
-/* Info panel typography */
-.info-panel .title {
-  font-size: 22px;
-  font-weight: 800;
-  margin-bottom: 6px;
+/* Player info panel fills its height */
+.info-panel{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.info-panel .stats {
-  font-size: 14px;
-  opacity: 0.9;
-  margin-bottom: 10px;
+/* Title + stats are fixed height */
+.info-panel .title,
+.info-panel .stats{
+  flex: 0 0 auto;
 }
 
-.info-panel .desc {
-  font-size: 14px;
-  line-height: 1.25;
-  opacity: 0.95;
+/* DESC becomes the remaining space */
+.info-panel .desc{
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
+
+/* ---- TOP HALF: description text ---- */
+.player-desc-text{
+  flex: 1 1 50%;
+  min-height: 0;
+
+  font-size: 16px;
+  line-height: 1.35;
+  padding-bottom: 8px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto; /* scroll if text is long */
+  align-items: stretch; /* prevents child centering */
+}
+
+/* ---- BOTTOM HALF: equipped gear ---- */
+#playerGear{
+  flex: 1 1 50%;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+
 
 /* Sprite panel centers the "3D render" */
 .sprite-panel {
@@ -571,17 +607,6 @@ body { margin: 0; }
 
 .reset-btn:hover {
   opacity: 1;
-}
-#playerGear {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.15);
-  font-size: 13px;
-  opacity: 0.95;
-}
-
-#playerGear div {
-  margin: 3px 0;
 }
 
 #gearAnyRow {
@@ -918,3 +943,63 @@ body { margin: 0; }
   margin: 6px auto 0;
   background: linear-gradient(90deg, transparent, #666, transparent);
 }
+/* Info panels: overall readability */
+.info-panel{
+  font-size: 18px;
+}
+
+/* Titles (Player / Creature names) */
+.info-panel .title{
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+}
+
+/* Stats line (ATK / DEF) */
+.info-panel .stats{
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* Description base text */
+.info-panel .desc{
+  font-size: 18px;
+  line-height: 1.4;
+}
+/* Passive / Ability blocks */
+.player-passive,
+.player-ability{
+  font-size: 20px;          /* larger than normal text */
+  margin-bottom: 10px;
+  text-align: left;
+  align-self: stretch;   /* fill available width */
+}
+
+/* Label styling */
+.desc-label{
+  font-size: 22px;          /* larger than rest of line */
+  font-weight: 900;
+  text-decoration: underline;
+  margin-right: 6px;
+  display: inline-block;
+  text-align: left;
+}
+#monsterDesc{
+  font-size: 18px;
+  line-height: 1.4;
+}
+/* Mobile-friendly: allow swipe/tap without scroll fighting */
+.class-card { touch-action: manipulation; }
+
+/* Flip on class instead of hover */
+.class-card.flipped .class-card-inner{
+  transform: scale(0.9) rotateY(180deg);
+}
+
+/* Optional: keep hover flip for desktop */
+@media (hover:hover){
+  .class-card:hover .class-card-inner{
+    transform: scale(0.9) rotateY(180deg);
+  }
+}
+.hand-card { touch-action: manipulation; }

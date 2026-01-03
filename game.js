@@ -8,6 +8,11 @@ const classFiles = [
 ];
 const HAND_SIZE = 2;
 const HP_ANIM_MS = 500;
+const SWIPE_FLIP_THRESHOLD = 40; // px
+const SWIPE_VERTICAL_CANCEL = 30;
+const LONGPRESS_MS = 500;
+const LONGPRESS_MOVE_CANCEL = 12;
+
 let hand = [];
 let roundActionUsed = false; // limits player to 1 play OR 1 discard per combat round
 let pendingNextEnemy = false;
@@ -28,6 +33,50 @@ function drawHand() {
   }
 
   renderHand();
+}
+function attachSwipeFlip(cardEl) {
+  let startX = 0, startY = 0;
+  let moved = false;
+  let wasSwipe = false;
+
+  cardEl.addEventListener("touchstart", (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    moved = false;
+    wasSwipe = false;
+  }, { passive: true });
+
+  cardEl.addEventListener("touchmove", (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    // If user is scrolling vertically, don't treat as swipe flip
+    if (Math.abs(dy) > SWIPE_VERTICAL_CANCEL && Math.abs(dy) > Math.abs(dx)) {
+      moved = true;
+    }
+  }, { passive: true });
+
+  cardEl.addEventListener("touchend", (e) => {
+    if (moved) return;
+
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (Math.abs(dx) > SWIPE_FLIP_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+      cardEl.classList.toggle("flipped");
+      wasSwipe = true;
+      // prevent the subsequent click from starting the game
+      cardEl.dataset.justSwiped = "1";
+      setTimeout(() => delete cardEl.dataset.justSwiped, 250);
+    }
+  }, { passive: true });
 }
 function waitHpAnim() {
   return new Promise(res => setTimeout(res, HP_ANIM_MS));
@@ -190,13 +239,7 @@ function cardToHandHTML(card) {
   if (!card) return "";
 
   const rarityClass = `rarity-${String(card.rarity || "Common").toLowerCase()}`;
-
-  const statVal =
-    (card.attack != null) ? `${card.attack} Atk` :
-    (card.armor  != null) ? `${card.armor} Def` :
-    (card.heal   != null) ? `${card.heal} Heal` :
-    (card.damage != null) ? `${card.damage} Dmg` : "";
-
+  const statVal = formatCardStats(card);     // ✅ shows atk + armor
   const desc = String(card.description ?? "");
 
   return `
@@ -212,18 +255,75 @@ function formatCardStats(card) {
   if (!card) return "";
 
   const parts = [];
-  if (card.attack != null) parts.push(`${card.attack} atk`);
-  if (card.armor  != null) parts.push(`${card.armor} armor`);
+  if (card.attack != null) parts.push(`+${card.attack} atk`);
+  if (card.armor  != null) parts.push(`+${card.armor} def`);
 
   // For non-equips, keep your old behavior for heal/dmg if desired
   if (!parts.length) {
-    if (card.heal   != null) parts.push(`${card.heal} heal`);
-    if (card.damage != null) parts.push(`${card.damage} dmg`);
+    if (card.heal   != null) parts.push(`+${card.heal} heal`);
+    if (card.damage != null) parts.push(`+${card.damage} dmg`);
   }
 
   return parts.join(" / ");
 }
+function attachLongPressDiscard(cardEl, idx) {
+  let timer = null;
+  let startX = 0, startY = 0;
+  let fired = false;
 
+  cardEl.addEventListener("touchstart", (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    fired = false;
+
+    timer = setTimeout(() => {
+      fired = true;
+      cardEl.dataset.longPress = "1";
+
+      const card = hand[idx];
+      if (!card) return;
+
+      if (!confirm(`Discard ${card.name}?`)) return;
+
+      hand.splice(idx, 1);
+      renderHand();
+      showDiscardOverlay?.();
+      saveGame?.();
+    }, LONGPRESS_MS);
+  }, { passive: true });
+
+  cardEl.addEventListener("touchmove", (e) => {
+    if (!timer || !e.touches || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (Math.hypot(dx, dy) > LONGPRESS_MOVE_CANCEL) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  }, { passive: true });
+
+  cardEl.addEventListener("touchend", () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+
+    // If long-press triggered, block the follow-up click
+    if (fired) {
+      setTimeout(() => delete cardEl.dataset.longPress, 250);
+    }
+  }, { passive: true });
+
+  cardEl.addEventListener("click", (e) => {
+    if (cardEl.dataset.longPress) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+  }, true);
+}
 // 2️⃣ Then define renderHand
 function renderHand() {
   console.log("Rendering hand:", hand);
@@ -235,7 +335,7 @@ function renderHand() {
 
   hand.forEach((card, idx) => {
     if (!card) return; // skip nulls
-  console.log('card: ', card);
+    console.log('card: ', card);
 
     const div = document.createElement("div");
 
@@ -252,6 +352,7 @@ function renderHand() {
     `;
 
     div.onclick = (e) => handleCardClick(idx, e);
+    attachLongPressDiscard(div, idx);
     handEl.appendChild(div);
     //playLootSound(card.rarity);
   });
@@ -1161,6 +1262,14 @@ async function showClassSelect() {
     div.onclick = () => startNewGame(data);
 
     container.appendChild(div);
+    attachSwipeFlip(div);
+
+    div.addEventListener("click", () => {
+      // If the user just swiped to flip, don't start game
+      if (div.dataset.justSwiped) return;
+      startNewGame(data);
+    });
+
   }
 }
 
@@ -1333,8 +1442,9 @@ function renderPlayer() {
   if (spriteNameEl) spriteNameEl.textContent = player.name ?? "Player";
 
   updateHpBar("player", player.currentHp ?? 0, maxHp);
-  if (passiveEl) passiveEl.textContent = player.passive ?? "—";
-  if (abilityEl) abilityEl.textContent = player.ability ?? "—";
+  if (passiveEl) passiveEl.innerHTML = `<span class="desc-label">Passive:</span> ${player.passive ?? "—"}`;
+  if (abilityEl) abilityEl.innerHTML = `<span class="desc-label">Ability:</span> ${player.ability ?? "—"}`;
+
   
    // --- Equipped slots in the player panel (render like hand cards) ---
   const wSlot = document.getElementById("equip-slot-weapon");
@@ -1343,6 +1453,11 @@ function renderPlayer() {
 
   const isClassless = (player.name || "").toLowerCase() === "classless";
   if (anySlot) anySlot.style.display = isClassless ? "block" : "none";
+  
+  const slotsWrap = document.getElementById("equippedSlots");
+  if (slotsWrap) slotsWrap.classList.toggle("has-any", isClassless);
+
+  if (anySlot) anySlot.style.display = isClassless ? "flex" : "none";
 
   renderEquipSlot(wSlot, player.equipment?.weapon, "Weapon");
   renderEquipSlot(aSlot, player.equipment?.armor,  "Armor");

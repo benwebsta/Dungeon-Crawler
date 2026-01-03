@@ -50,19 +50,22 @@
 
 
 		  <div class="panel info-panel" id="playerInfo">
-			<div class="title" id="playerName">Your Class</div>
-			<div class="stats" id="playerStats">ATK 0 • DEF 0 • HP 0/0</div>
+			<div class="title" id="playerName">Your Class</div><br>
+			<div class="stats" id="playerStats">ATK 0 • DEF 0 • HP 0/0</div><br>
 			<div class="desc" id="playerDesc">
-			  <div><strong>Passive:</strong> <span id="playerPassive">—</span></div>
-			  <div><strong>Ability:</strong> <span id="playerAbility">—</span></div>
+				<div class="player-desc-text">
+					<div id="playerPassive" class="player-passive"></div>
+					<div id="playerAbility" class="player-ability"></div>
+				</div>
 
-				<div class="gear" id="playerGear">
+
+				<div id="playerGear">
 					<div id="equippedSlots" class="equipped-slots">
 						<div id="equip-slot-weapon" class="equip-slot" data-slot="weapon"></div>
 						<div id="equip-slot-armor"  class="equip-slot" data-slot="armor"></div>
 						<div id="equip-slot-any"    class="equip-slot equip-slot-any" data-slot="any" style="display:none;"></div>
 					</div>
-				</div>	
+				</div>
 
 			</div>
 		  </div>
