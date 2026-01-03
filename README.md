@@ -19,6 +19,7 @@ but bad decisions can end a run quickly.
 
 At the start of the game, choose one class:
 ----------------------------------------------------------------------------------
+NOTES FOR PHONE USE: Swipe to flip character cards.
 
 Warrior – Balanced fighter, strong with weapons and armor
 
@@ -75,6 +76,9 @@ Stronger creatures appear less often
 ----------------------------------------------------------------------------------
 ✋ Your Hand
 ----------------------------------------------------------------------------------
+NOTES FOR PHONE USE: Press and hold to discard a card.
+
+You may hold shift and click to discard a card.
 
 You may hold up to 2 cards at the end of a room
 
