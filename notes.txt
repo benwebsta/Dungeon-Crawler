@@ -16,6 +16,7 @@ Notes / Current State / To Do:
         8. Add and test classless (3 items)
         9. Continue to update UI and animations
         10. Add logic for consumables (damage to creatures, etc.)
+        11. Add Rewards for Creatures
     b. Once DONE with logic
         1. Add images for all cards (creatures, consumables, equips)
     c. Other Notes and Misc to do:

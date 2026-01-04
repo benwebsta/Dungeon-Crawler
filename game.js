@@ -34,6 +34,36 @@ function drawHand() {
 
   renderHand();
 }
+function slugifyName(name) {
+  return String(name || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function getEquipImageSrc(card) {
+  const r = String(card?.rarity || "Common").toLowerCase();
+  // folder names: equips_common, equips_rare, equips_epic, equips_legendary
+  return `images/equips/${slugifyName(card.name)}.png`;
+}
+
+function getEquipImageHTML(card, extraClass = "") {
+  // Only show images for gear (as requested)
+  if (!card || !["weapon", "armor", "any"].includes(card.type)) return "";
+
+  const src = getEquipImageSrc(card);
+  return `
+    <img
+      class="card-img ${extraClass}"
+      src="${src}"
+      alt="${card.name}"
+      loading="lazy"
+      onerror="this.style.display='none'"
+    />
+  `;
+}
+
 function attachSwipeFlip(cardEl) {
   let startX = 0, startY = 0;
   let moved = false;
@@ -111,6 +141,7 @@ function renderEquipment() {
       const desc = String(card.description ?? "").replace(/\n/g, "<br>");
 
       slotEl.innerHTML = `
+        ${getEquipImageHTML(card, "slot-img")}
         <div class="card-name">${card.name}</div>
         <div class="stat">${statText}</div>
         <div class="description">${desc}</div>
@@ -244,6 +275,7 @@ function cardToHandHTML(card) {
 
   return `
     <div class="hand-card ${rarityClass}">
+      ${getEquipImageHTML(card)}
       <strong>${card.name}</strong><br>
       <span class="stat">${statVal}</span><br>
       <em class="description">${desc}</em>
@@ -346,6 +378,7 @@ function renderHand() {
     const desc = String(card.description ?? "");
 
     div.innerHTML = `
+      ${getEquipImageHTML(card)}
       <strong>${card.name}</strong><br>
       <span class="stat">${statVal}</span><br>
       <em class="description">${desc}</em>
@@ -1397,7 +1430,8 @@ function renderEnemy() {
   if (spriteNameEl) spriteNameEl.textContent = enemy.name ?? "Monster";
 
   // ✅ remove HP from the info-panel stats
-  if (statsEl) statsEl.textContent = `ATK ${enemy.attack ?? 0}`;
+  if (statsEl) statsEl.textContent = 
+      `ATK ${enemy.attack ?? 0} • HP ${enemy.currentHp ?? 0}/${enemy.hp ?? 0} `;
 
   if (descEl)  descEl.textContent  = enemy.description ?? "";
 
@@ -1433,7 +1467,8 @@ function renderPlayer() {
   player.currentHp = Math.min(player.currentHp, maxHp);
 
   if (nameEl)    nameEl.textContent = player.name ?? "Player";
-  if (statsEl)   statsEl.textContent = `ATK ${totalAtk} • DEF ${totalDef}`;
+  if (statsEl)   statsEl.textContent = 
+    `ATK ${totalAtk} • DEF ${totalDef} • HP ${player.currentHp ?? 0}/${maxHp}`;
 
   const spriteNameEl = document.getElementById("playerSpriteName");
   if (spriteNameEl) spriteNameEl.textContent = player.name ?? "Player";
@@ -1476,11 +1511,11 @@ function renderEnemySprite() {
 
   // If your creature JSON includes enemy.image, use it.
   // Otherwise fallback to a generic placeholder.
-  //const src = enemy.image
-  //  ? enemy.image
-  //  : `images/monsters/${(enemy.name || "monster").toLowerCase().replace(/\s+/g,'_')}.png`;
+  const src = enemy.image
+    ? enemy.image
+    : `images/creatures/${(enemy.name || "monster").toLowerCase().replace(/\s+/g,'_')}.png`;
 
-  const src = `images/creatures/rare_goblin.png`;
+  //const src = `images/creatures/rare_goblin.png`;
   el.innerHTML = `<img src="${src}" alt="${enemy.name}">`;
 }
 
