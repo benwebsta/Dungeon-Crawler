@@ -1010,14 +1010,55 @@ function animateEquipFromHandToSlot(handCardEl, slotEl, onDone) {
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 let SFX_VOLUME = 0.5; // 0.0 = mute, 1.0 = full
+let audioUnlocked = false;
+
+async function unlockAudio() {
+  if (audioUnlocked) return;
+
+  try {
+    if (audioCtx.state === "suspended") {
+      await audioCtx.resume();
+    }
+
+    // iOS extra unlock: play 1-sample silent buffer
+    const buffer = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+    const src = audioCtx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(audioCtx.destination);
+    src.start(0);
+
+    audioUnlocked = true;
+    console.log("✅ Audio unlocked:", audioCtx.state);
+  } catch (e) {
+    console.warn("Audio unlock failed:", e);
+  }
+}
+
+function bindAudioUnlock() {
+  const handler = () => {
+    unlockAudio();
+    window.removeEventListener("pointerdown", handler, true);
+    window.removeEventListener("touchstart", handler, true);
+    window.removeEventListener("mousedown", handler, true);
+    window.removeEventListener("keydown", handler, true);
+  };
+
+  window.addEventListener("pointerdown", handler, true);
+  window.addEventListener("touchstart", handler, true);
+  window.addEventListener("mousedown", handler, true);
+  window.addEventListener("keydown", handler, true);
+}
+
+bindAudioUnlock();
 
 function playLootSound(rarity) {
+  if (!audioUnlocked) return;
   if (audioCtx.state === "suspended") {
     audioCtx.resume().catch(() => {});
   }
-  const masterGain = audioCtx.createGain();
-  masterGain.gain.value = 0.5;
-  masterGain.connect(audioCtx.destination);
+  // const masterGain = audioCtx.createGain();
+  // masterGain.gain.value = 0.5;
+  // masterGain.connect(audioCtx.destination);
 
   const ctx = audioCtx;
   const now = ctx.currentTime;
@@ -1071,6 +1112,7 @@ function playLootSound(rarity) {
   osc.stop(now + duration);
 }
 function playEquipSound(cardType, rarity) {
+  if (!audioUnlocked) return;
   if (audioCtx.state === "suspended") {
     audioCtx.resume().catch(() => {});
   }
@@ -1295,8 +1337,9 @@ async function showClassSelect() {
     container.appendChild(div);
     attachSwipeFlip(div);
 
-    div.addEventListener("click", () => {
+    div.addEventListener("click", async () => {
       if (div.dataset.justSwiped) return;
+      await unlockAudio();       // ✅ ensure unlocked on class pick
       startNewGame(data);
     });
 
