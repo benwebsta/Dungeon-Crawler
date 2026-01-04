@@ -1,5 +1,26 @@
 Notes / Current State / To Do:
 
+IMAGE GENERATION PROMPT PRECURSOR:
+generate Dark fantasy digital illustration, 
+centered subject, transparent background, 
+no text, no UI, no border, sharp silhouette, 
+readable at small size, soft dramatic lighting, 
+painterly but clean, high contrast, fantasy card 
+game style, PNG with alpha channel
+
+
+
+
+Added floors. Need to verify monster and equip rolls with number 
+generation text on screen.
+
+Need to verify increasing odds.
+
+Add boss and win condition.
+
+
+
+
 1. Game state has animations and HP bars. 
 2. Remaining To Do:
     a. Add Game logic:

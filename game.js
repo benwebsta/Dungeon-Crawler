@@ -17,6 +17,22 @@ let hand = [];
 let roundActionUsed = false; // limits player to 1 play OR 1 discard per combat round
 let pendingNextEnemy = false;
 let roomsCleared = 0;
+// ---- FLOORS ----
+let currentFloor = 1;
+let killsThisFloor = 0;
+const KILLS_PER_FLOOR = 5;
+const MAX_FLOOR = 3;
+
+const FLOOR_ODDS = {
+  1: { common: 65, rare: 20, epic: 10, legendary: 5 },   // "Unique" = epic in your code
+  2: { common: 45, rare: 30, epic: 15, legendary: 10 },
+  3: { common: 15, rare: 45, epic: 25, legendary: 15 }
+};
+function updateFloorHud() {
+  const el = document.getElementById("floorHud");
+  if (!el) return;
+  el.textContent = `Floor ${currentFloor} • Kills ${killsThisFloor}/${KILLS_PER_FLOOR}`;
+}
 
 function drawHand() {
   hand = [];
@@ -34,6 +50,49 @@ function drawHand() {
 
   renderHand();
 }
+function setMonsterRarityUI(rarity) {
+  const info = document.getElementById("monsterInfo");
+  const spritePanel = document.getElementById("monsterSpritePanel");
+  if (!info || !spritePanel) return;
+
+  const classes = ["rarity-common", "rarity-rare", "rarity-epic", "rarity-legendary"];
+  info.classList.remove(...classes);
+  spritePanel.classList.remove(...classes);
+
+  const r = String(rarity || "Common").toLowerCase();
+  const cls = `rarity-${r}`;
+  info.classList.add(cls);
+  spritePanel.classList.add(cls);
+}
+
+function sleep(ms) {
+  return new Promise(res => setTimeout(res, ms));
+}
+
+async function showToast(message, ms = 2000) {
+  const overlay = document.getElementById("toastOverlay");
+  const text = document.getElementById("toastText");
+  if (!overlay || !text) {
+    // fallback: don't break the game if HTML not inserted
+    console.warn("toastOverlay/toastText missing");
+    await sleep(ms);
+    return;
+  }
+
+  text.textContent = message;
+  overlay.classList.remove("hidden");
+
+  await sleep(ms);
+
+  overlay.classList.add("hidden");
+  await sleep(50); // tiny gap so the next message doesn't flicker
+}
+
+async function runIntroSequence() {
+  await showToast("Welcome to the Dungeon, good luck!", 2000);
+  await showToast("Floor 1", 2000);
+}
+
 function slugifyName(name) {
   return String(name || "")
     .toLowerCase()
@@ -270,18 +329,27 @@ function cardToHandHTML(card) {
   if (!card) return "";
 
   const rarityClass = `rarity-${String(card.rarity || "Common").toLowerCase()}`;
-  const statVal = formatCardStats(card);     // ✅ shows atk + armor
+  const statVal = formatCardStats(card);
   const desc = String(card.description ?? "");
 
+  const bgSrc =
+    (card && ["weapon", "armor", "any"].includes(card.type))
+      ? getEquipImageSrc(card)
+      : "";
+
+  const bgStyle = bgSrc ? `style="background-image:url('${bgSrc.replace(/'/g, "%27")}')"` : "";
+
   return `
-    <div class="hand-card ${rarityClass}">
-      ${getEquipImageHTML(card)}
-      <strong>${card.name}</strong><br>
-      <span class="stat">${statVal}</span><br>
-      <em class="description">${desc}</em>
+    <div class="hand-card ${rarityClass} ${bgSrc ? "" : "no-img"}" ${bgStyle}>
+      <div class="overlay-top">${card.name}</div>
+      <div class="overlay-bottom">
+        <span class="stat">${statVal}</span>
+        <span class="description">${desc}</span>
+      </div>
     </div>
   `;
 }
+
 
 function formatCardStats(card) {
   if (!card) return "";
@@ -377,12 +445,28 @@ function renderHand() {
     const statVal = formatCardStats(card);
     const desc = String(card.description ?? "");
 
+    // Background image (gear uses images/equips/<name>.png; consumables likely no image)
+    const bgSrc =
+      (card && ["weapon", "armor", "any"].includes(card.type))
+        ? getEquipImageSrc(card)
+        : ""; // optionally set consumable images if you have them
+
+    if (bgSrc) {
+      div.style.backgroundImage = `url("${bgSrc}")`;
+      div.classList.remove("no-img");
+    } else {
+      div.style.backgroundImage = "";
+      div.classList.add("no-img");
+    }
+
     div.innerHTML = `
-      ${getEquipImageHTML(card)}
-      <strong>${card.name}</strong><br>
-      <span class="stat">${statVal}</span><br>
-      <em class="description">${desc}</em>
+      <div class="overlay-top">${card.name}</div>
+      <div class="overlay-bottom">
+        <span class="stat">${statVal}</span>
+        <span class="description">${desc}</span>
+      </div>
     `;
+
 
     div.onclick = (e) => handleCardClick(idx, e);
     attachLongPressDiscard(div, idx);
@@ -517,6 +601,8 @@ async function resetGame() {
   pendingNextEnemy = false;
   roundActionUsed = false;
   roomsCleared = 0;
+  currentFloor = 1;
+  killsThisFloor = 0;
 
   // Wipe game state
   player = null;
@@ -577,7 +663,11 @@ function nextEnemy() {
   // If hand is already too big for some reason, force discard
   showDiscardOverlay();
 }
-function handleKillReward() {
+async function handleKillReward() {
+  // ✅ count the kill first
+  killsThisFloor++;
+
+  // Reward draw (same as before)
   const reward = drawReward();
   if (reward) {
     hand.push(reward);
@@ -586,6 +676,8 @@ function handleKillReward() {
     saveGame?.();
   }
 
+  updateUI();
+
   // If too many cards, pause progression and force discard
   if (hand.filter(Boolean).length > 2) {
     pendingNextEnemy = true;
@@ -593,9 +685,25 @@ function handleKillReward() {
     return; // DO NOT spawn next enemy yet
   }
 
-  // Otherwise continue immediately
+  // ✅ floor advance check
+  if (killsThisFloor >= KILLS_PER_FLOOR) {
+    if (currentFloor < MAX_FLOOR) {
+      currentFloor++;
+      killsThisFloor = 0;
+
+      updateUI();
+      await showToast(`Floor ${currentFloor}`, 2000);
+    } else {
+      // At max floor: for Step 2 we just keep spawning on Floor 3.
+      // Step 3 will be "boss after 3 floors".
+      updateUI();
+    }
+  }
+
+  // Continue immediately
   nextEnemy();
 }
+
 
 
 function showDiscardOverlay() {
@@ -636,11 +744,30 @@ function showDiscardOverlay() {
           card.damage != null ? `${card.damage} dmg` : null,
         ].filter(Boolean).join(" / ");
 
+    const desc = String(card.description ?? "");
+
+    // background image for gear
+    const bgSrc =
+      (card && ["weapon", "armor", "any"].includes(card.type))
+        ? getEquipImageSrc(card)
+        : "";
+
+    if (bgSrc) {
+      div.style.backgroundImage = `url("${bgSrc}")`;
+      div.classList.remove("no-img");
+    } else {
+      div.style.backgroundImage = "";
+      div.classList.add("no-img");
+    }
+
     div.innerHTML = `
-      <strong>${card.name}</strong><br>
-      <span class="stat">${statText}</span><br>
-      <em class="description">${card.description ?? ""}</em>
+      <div class="overlay-top">${card.name}</div>
+      <div class="overlay-bottom">
+        <span class="stat">${statText}</span>
+        <span class="description">${desc}</span>
+      </div>
     `;
+
 
     div.onclick = () => {
       // Forced discard - no confirm (add it back if you want)
@@ -717,6 +844,7 @@ async function attack() {
     // If enemy died, wait already done -> now popup
     if (enemy.currentHp === 0) {
       alert(`${enemy.name} defeated!`);
+      roundActionUsed = false;
       handleKillReward();
       isAttackAnimating = false;
       setAttackButtonEnabled(true);
@@ -731,6 +859,7 @@ async function attack() {
 
       if (player.currentHp === 0) {
         alert("You died!");
+        roundActionUsed = false;
         await resetGame();
         isAttackAnimating = false;
         return;
@@ -757,6 +886,7 @@ async function attack() {
 
       if (enemy.currentHp === 0) {
         alert(`${enemy.name} defeated!`);
+        roundActionUsed = false;
         handleKillReward();
         isAttackAnimating = false;
         setAttackButtonEnabled(true);
@@ -813,34 +943,68 @@ function enemyAttackDamage() {
   player.currentHp = Math.max(0, player.currentHp - reduced);
 }
 
-function pickFromPools(pools) {
+function pickFromPools(pools, forcedRarity) {
   const combined = [];
 
   for (const p of pools) {
     if (Array.isArray(p) && p.length) combined.push(...p);
   }
-
   if (!combined.length) return null;
 
   const card = combined[Math.floor(Math.random() * combined.length)];
 
-  // IMPORTANT: clone so equipment stats don't mutate deck cards
-  return JSON.parse(JSON.stringify(card));
+  // clone
+  const cloned = JSON.parse(JSON.stringify(card));
+
+  // ✅ ensure rarity exists (common/rare/epic/legendary)
+  if (forcedRarity) cloned.rarity = forcedRarity;
+  else if (!cloned.rarity) cloned.rarity = "common";
+
+  return cloned;
 }
 
+
+function getFloorOdds() {
+  return FLOOR_ODDS[currentFloor] || FLOOR_ODDS[1];
+}
+
+function rollRarityForFloor() {
+  const o = getFloorOdds();
+  const r = Math.random() * 100;
+
+  const c = o.common;
+  const rr = c + o.rare;
+  const e = rr + o.epic;
+
+  if (r < c) return "common";
+  if (r < rr) return "rare";
+  if (r < e) return "epic";
+  return "legendary";
+}
+
+function getRewardPoolsForRarity(rarity) {
+  // NOTE: you originally allowed "fallback" to lower tiers.
+  // Keeping that same vibe: higher rarity can fall back into lower pools too.
+  if (rarity === "common") return [decks.equips_common];
+  if (rarity === "rare") return [decks.equips_rare, decks.equips_common];
+  if (rarity === "epic") return [decks.equips_epic, decks.equips_rare, decks.equips_common];
+  return [decks.equips_legendary, decks.equips_epic, decks.equips_rare];
+}
+
+function getCreaturePoolsForRarity(rarity) {
+  if (rarity === "common") return [decks.creatures_common];
+  if (rarity === "rare") return [decks.creatures_rare, decks.creatures_common];
+  if (rarity === "epic") return [decks.creatures_epic, decks.creatures_rare, decks.creatures_common];
+  return [decks.creatures_legendary, decks.creatures_epic, decks.creatures_rare];
+}
 
 
 function drawReward() {
-  const roll = Math.random() * 100;
-
-  const pools =
-    roll < 50 ? [decks.equips_common] :
-    roll < 80 ? [decks.equips_rare, decks.equips_common] :
-    roll < 95 ? [decks.equips_epic, decks.equips_rare, decks.equips_common] :
-                [decks.equips_legendary, decks.equips_epic, decks.equips_rare];
-
+  const rarity = rollRarityForFloor();
+  const pools = getRewardPoolsForRarity(rarity);
   return pickFromPools(pools);
 }
+
 
 
 
@@ -877,6 +1041,7 @@ function updateUI() {
   // these are cheap, safe to call
   renderEquipment?.();
   renderHand();
+  updateFloorHud(); // ✅ add
 }
 
 let isAttackAnimating = false;
@@ -1347,7 +1512,7 @@ async function showClassSelect() {
 }
 
 async function startNewGame(classData) {
-	console.log('start game');
+  console.log('start game');
   player = {
     ...classData,
     currentHp: classData.hp,
@@ -1358,22 +1523,32 @@ async function startNewGame(classData) {
     }
   };
 
-  // Show/hide "any" slot
-	const anySlot = document.getElementById("slot-any");
-	if (anySlot) {
-	  if (player.name.toLowerCase() === "classless") {
-		anySlot.style.display = "flex";
-	  } else {
-		anySlot.style.display = "none";
-	  }
-	}
+  // Show/hide "any" slot (NOTE: your HTML uses equip-slot-any, not slot-any)
+  const anySlot = document.getElementById("equip-slot-any");
+  if (anySlot) {
+    const isClassless = (player.name || "").toLowerCase() === "classless";
+    anySlot.style.display = isClassless ? "flex" : "none";
+  }
+  currentFloor = 1;
+  killsThisFloor = 0;
 
+  switchToGame();         // show game UI first so overlay is visible
   renderPlayerSprite();
-  handleKillReward();       // starts first room
+  updateUI();
+
+  // ✅ new: intro + floor popup sequence
+  await runIntroSequence();
+
+  // ✅ only after popups, start the run
+  //handleKillReward();     // starts first room
+
+   // ✅ draw 1 card for entering the room
+  drawHandForRoom();
+  nextEnemy();
   saveGame();
-  switchToGame();
   updateUI();
 }
+
 
 
 function switchToGame() {
@@ -1387,9 +1562,12 @@ function switchToGame() {
 function saveGame() {
   localStorage.setItem(SAVE_KEY, JSON.stringify({
     player,
-    enemy
+    enemy,
+    currentFloor,
+    killsThisFloor
   }));
 }
+
 
 function loadGame() {
   const data = localStorage.getItem(SAVE_KEY);
@@ -1400,11 +1578,15 @@ function loadGame() {
   player = save.player;
   enemy = save.enemy;
 
+  currentFloor = save.currentFloor ?? 1;
+  killsThisFloor = save.killsThisFloor ?? 0;
+
   switchToGame();
   updateUI();
   updateEquipmentUI();
   return true;
 }
+
 
 document.querySelectorAll(".slot").forEach(slot => {
   slot.ondragover = e => e.preventDefault();
@@ -1463,38 +1645,44 @@ function updateHpBar(kind, current, max) {
 function renderEnemy() {
   if (!enemy) return;
 
+  setMonsterRarityUI(enemy.rarity); // ✅ add this line
+
   const nameEl  = document.getElementById("monsterName");
   const statsEl = document.getElementById("monsterStats");
   const descEl  = document.getElementById("monsterDesc");
-
   const spriteNameEl = document.getElementById("monsterSpriteName");
 
   if (nameEl)  nameEl.textContent  = enemy.name ?? "Monster";
   if (spriteNameEl) spriteNameEl.textContent = enemy.name ?? "Monster";
 
-  // ✅ remove HP from the info-panel stats
-  if (statsEl) statsEl.textContent = 
-      `ATK ${enemy.attack ?? 0} • HP ${enemy.currentHp ?? 0}/${enemy.hp ?? 0} `;
+  if (statsEl) statsEl.textContent =
+    `ATK ${enemy.attack ?? 0} • HP ${enemy.currentHp ?? 0}/${enemy.hp ?? 0}`;
 
-  if (descEl)  descEl.textContent  = enemy.description ?? "";
+  if (descEl) descEl.textContent = enemy.description ?? "";
 
-  // ✅ update HP bar under sprite
   updateHpBar("monster", enemy.currentHp ?? 0, enemy.hp ?? 0);
+
+  // ✅ rarity outline on creature panels
+  applyRarityClass(document.getElementById("monsterSpritePanel"), enemy.rarity);
+  applyRarityClass(document.getElementById("monsterInfo"), enemy.rarity);
 }
+
 
 
 function renderEquipSlot(el, card, placeholder) {
   if (!el) return;
+
   el.dataset.placeholder = placeholder;
 
   if (card) {
     el.classList.remove("empty");
-    el.innerHTML = cardToHandHTML(card);
+    el.innerHTML = cardToHandHTML(card);  // ✅ now uses background layout
   } else {
     el.classList.add("empty");
-    el.innerHTML = "";
+    el.innerHTML = "";                    // placeholder handled by CSS ::before
   }
 }
+
 
 function renderPlayer() {
   if (!player) return;
@@ -1564,17 +1752,16 @@ function renderEnemySprite() {
 
 
 function drawCreature() {
-  const roll = Math.random() * 100;
-
-  // Same rates as equips
-  const pools =
-    roll < 50 ? [decks.creatures_common] :
-    roll < 80 ? [decks.creatures_rare, decks.creatures_common] :
-    roll < 95 ? [decks.creatures_epic, decks.creatures_rare, decks.creatures_common] :
-                [decks.creatures_legendary, decks.creatures_epic, decks.creatures_rare];
-
-  return pickFromPools(pools); // uses your combined+clone version
+  const rarity = rollRarityForFloor();
+  const pools = getCreaturePoolsForRarity(rarity);
+  return pickFromPools(pools, rarity); // ✅ pass rarity in
 }
+function applyRarityClass(el, rarity) {
+  if (!el) return;
+  el.classList.remove("rarity-common", "rarity-rare", "rarity-epic", "rarity-legendary");
+  el.classList.add(`rarity-${String(rarity || "common").toLowerCase()}`);
+}
+
 
 function spawnRandomEnemy() {
   const picked = drawCreature();

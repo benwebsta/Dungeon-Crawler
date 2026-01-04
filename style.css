@@ -379,20 +379,6 @@ button{
   opacity: 0.95;
 }
 
-/* =========================
-   HAND BAR (3-column, 1/3 width each)
-========================= */
-#handBar{
-  flex: 0 0 auto;
-  height: 26vh;
-  min-height: 220px;
-  border: 2px solid #444;
-  border-radius: 12px;
-  padding: 10px;
-  background: rgba(10,10,10,0.85);
-  overflow: hidden;
-}
-
 .hand-title{
   font-size: 18px;
   font-weight: 700;
@@ -409,66 +395,200 @@ button{
   background: linear-gradient(90deg, transparent, #666, transparent);
 }
 
-/* 3-column grid; cards fill height */
-#hand{
-  height: calc(100% - 32px);
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  align-items: stretch;
-}
-
-/* Base card style (hand + discard + equipped render) */
-.hand-card{
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-  border: 2px solid #555;
-  background: #333;
-  border-radius: 12px;
-
+/* =========================
+   HAND BAR: make hand area usable height
+========================= */
+#handBar{
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
-  overflow: hidden;
-
-  touch-action: manipulation;
 }
 
-.hand-card:hover{
-  transform: scale(1.03);
-  background: #444;
-}
-
-/* Image in hand cards fills most of the height */
-.hand-card .card-img{
+/* The hand container should take ALL remaining space under the title */
+#hand{
   flex: 1 1 auto;
-  width: 100%;
-  object-fit: contain;
-  display: block;
-  margin: 0 0 8px;
+  min-height: 0;
+
+  display: flex;
+  justify-content: center;   /* center the whole row */
+  align-items: stretch;      /* cards fill height */
+  gap: 12px;
+
+  padding: 6px 6px 10px;
 }
 
-.hand-card .stat{
-  color: #ffd700;
-  font-weight: bold;
-  margin-top: 2px;
+/* Hand cards: 1/3 width each, taller, fill the hand height */
+#hand .hand-card{
+  flex: 0 1 33%;             /* ~1/3 of the row */
+  max-width: 320px;          /* prevent ridiculous huge on desktop */
+  min-width: 160px;
+
+  height: 100%;              /* fill the available hand height */
+  min-height: 190px;         /* safety */
+  border-radius: 12px;
+
+  /* keep your background-image setup */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border: 2px solid #666;
 }
 
-.hand-card .description{
-  font-size: 12px;
-  font-style: italic;
-  margin-top: 4px;
-  text-align: center;
+/* If you only have 1–2 cards, keep them centered and still big */
+#hand .hand-card{
+  margin: 0;
+}
 
+/* Optional: if you want exactly “big card” feel */
+#hand .hand-card .overlay-top{
+  font-size: 16px;
+  padding: 10px 12px;
+}
+
+#hand .hand-card .overlay-bottom{
+  padding: 10px 12px;
+}
+
+#hand .hand-card .overlay-bottom .stat{
+  font-size: 14px;
+}
+
+#hand .hand-card .overlay-bottom .description{
+  font-size: 13px;
+  line-height: 1.15;
+  max-height: 3.6em; /* ~3 lines */
+}
+
+
+.hand-card {
+  position: relative;
   overflow: hidden;
-  text-overflow: ellipsis;
+
+  width: 160px;
+  height: 190px;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border-radius: 10px;
+  border-width: 2px;
+  border-style: solid;
+
+  /* 🔑 keeps background from covering border */
+  background-clip: padding-box;
+  z-index: 1;
 }
+
+
+/* darken the background a touch for readability */
+.hand-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.10) 45%,
+    rgba(0,0,0,0.20) 100%
+  );
+  z-index: 0;
+  border-radius: inherit;
+}
+
+/* top name band */
+.hand-card .overlay-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.60);
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1.1;
+
+  z-index: 1;
+}
+
+/* bottom stats + description band */
+.hand-card .overlay-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.60);
+  color: #fff;
+
+  z-index: 1;
+}
+
+.hand-card .overlay-bottom .stat {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+/* clamp description so it never pushes off-screen */
+.hand-card .overlay-bottom .description {
+  display: block;
+  font-size: 12px;
+  line-height: 1.15;
+
+  max-height: 2.4em; /* ~2 lines */
+  overflow: hidden;
+}
+
+/* fallback when no image exists */
+.hand-card.no-img {
+  background: #222;
+}
+
+
+/* Make the item image smaller and not dominate the card */
+.hand-card .card-img {
+  width: 64px;          /* smaller */
+  height: 64px;         /* smaller */
+  object-fit: contain;
+
+  margin: 0 auto 6px;   /* less vertical space */
+  display: block;
+}
+
+/* Raise text up by tightening spacing */
+.hand-card strong {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 4px;
+  font-size: 16px;
+  line-height: 1.05;
+}
+
+.hand-card .stat {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  opacity: 0.95;
+}
+
+/* Keep description visible but not huge */
+.hand-card .description {
+  display: block;
+  font-size: 12px;
+  opacity: 0.9;
+  line-height: 1.1;
+
+  /* clamp to avoid pushing info off */
+  max-height: 2.4em;     /* ~2 lines */
+  overflow: hidden;
+}
+
+
 
 /* =========================
    OVERLAY (Discard)
@@ -544,21 +664,19 @@ button{
 /* =========================
    RARITY STYLES
 ========================= */
+/* ✅ RARITY STYLES (DO NOT set background here — it overrides card art) */
 .rarity-common{
-  background: linear-gradient(180deg, #2b2b2b, #1f1f1f);
   border: 2px solid #7a7a7a;
   color: #e8e8e8;
 }
 
 .rarity-rare{
-  background: linear-gradient(180deg, #0c2a4a, #081a2f);
   border: 2px solid #2d8bff;
   border-radius: 18px;
   box-shadow: 0 0 14px rgba(45,139,255,0.22);
 }
 
 .rarity-epic{
-  background: linear-gradient(180deg, #2a0b3f, #14061f);
   border: 2px solid #b05cff;
   color: #f2eaff;
   border-radius: 10px;
@@ -575,18 +693,10 @@ button{
   opacity: 0.15;
   animation: epicPulse 2.6s ease-in-out infinite;
   pointer-events: none;
-}
-
-@keyframes epicPulse{
-  0%{ opacity: 0.15; }
-  50%{ opacity: 0.35; }
-  100%{ opacity: 0.15; }
+  z-index: 0; /* ✅ keep it behind overlays */
 }
 
 .rarity-legendary{
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), transparent 55%),
-    linear-gradient(180deg, #4a3a00, #201700);
   color: #fff3b0;
   border: 2px solid rgba(255,208,0,0.95);
   border-radius: 10px;
@@ -595,6 +705,7 @@ button{
   overflow: hidden;
 }
 
+/* ✅ shimmer stays fine, just keep it behind overlays */
 .rarity-legendary::after{
   content: "";
   position: absolute;
@@ -603,6 +714,14 @@ button{
   transform: translateX(-120%);
   animation: legendaryShimmer 1.1s ease-out 1;
   pointer-events: none;
+  z-index: 0;
+}
+
+
+@keyframes epicPulse{
+  0%{ opacity: 0.15; }
+  50%{ opacity: 0.35; }
+  100%{ opacity: 0.15; }
 }
 
 @keyframes legendaryShimmer{
@@ -661,4 +780,187 @@ button{
   font-size: 0.9em;
   opacity: 0.9;
   white-space: nowrap; /* keeps ATK/DEF/HP on one line */
+}
+.toast-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  background: rgba(0,0,0,0.55);
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+.toast-overlay.hidden {
+  display: none;
+}
+
+.toast-box {
+  max-width: 80vw;
+  padding: 18px 22px;
+  border-radius: 12px;
+  background: rgba(20,20,20,0.92);
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transform: scale(1);
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.toast-text {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+}
+
+/* optional: small screens */
+@media (max-width: 480px) {
+  .toast-text { font-size: 18px; }
+}
+.floor-hud {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  z-index: 9000;
+
+  font-weight: 700;
+  font-size: 16px;
+  padding: 6px 12px;
+
+  background: rgba(0,0,0,0.65);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+
+  pointer-events: none; /* clicks pass through */
+}
+
+/* =========================
+   CARD BASE (used by hand + equipped)
+========================= */
+.hand-card{
+  position: relative;
+  overflow: hidden;
+
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: block;
+}
+/* =========================
+   EQUIPPED CARDS = SAME LAYOUT, SMALLER
+========================= */
+.equip-slot{
+  padding: 6px;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.equip-slot .hand-card{
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  border-radius: 10px;
+}
+
+/* Slightly tighter text for equipped view */
+.equip-slot .overlay-top{
+  font-size: 14px;
+  padding: 6px 8px;
+}
+
+.equip-slot .overlay-bottom{
+  padding: 6px 8px;
+}
+
+.equip-slot .overlay-bottom .stat{
+  font-size: 12px;
+}
+
+.equip-slot .overlay-bottom .description{
+  font-size: 11px;
+  max-height: 2.2em;
+}
+.equip-slot{
+  min-height: 220px;
+}
+.hand-card .overlay-top,
+.hand-card .overlay-bottom {
+  position: relative;
+  z-index: 2;
+}
+.hand-card.rarity-common,
+.hand-card.rarity-rare,
+.hand-card.rarity-epic,
+.hand-card.rarity-legendary {
+  border-style: solid;
+}
+/* =========================
+   FINAL FIX: Hand rarity borders + sizing
+   (paste at bottom)
+========================= */
+
+/* 1) Hand cards should NOT use the global fixed 160x190 sizing */
+#hand .hand-card{
+  width: auto !important;
+  height: 100% !important;
+  min-height: 190px;
+  border-radius: 12px;
+  isolation: isolate; /* new stacking context */
+}
+
+/* 2) Keep overlay INSIDE the border so border stays visible */
+#hand .hand-card::before{
+  inset: 2px;               /* leaves border visible */
+  border-radius: 10px;      /* 12px - 2px inset */
+  z-index: 0;
+}
+
+/* 3) Force rarity border colors on HAND specifically */
+#hand .hand-card.rarity-common{ border-color: #7a7a7a !important; }
+#hand .hand-card.rarity-rare{ border-color: #2d8bff !important; }
+#hand .hand-card.rarity-epic{ border-color: #b05cff !important; }
+#hand .hand-card.rarity-legendary{ border-color: rgba(255,208,0,0.95) !important; }
+
+/* 4) Make sure border is always solid on hand */
+#hand .hand-card{ border-style: solid !important; }
+#hand .overlay-top,
+#hand .overlay-bottom{
+  position: absolute !important;
+}
+#monsterSpritePanel.rarity-common,
+#monsterSpritePanel.rarity-rare,
+#monsterSpritePanel.rarity-epic,
+#monsterSpritePanel.rarity-legendary{
+  border-style: solid;
+}
+/* =========================
+   FORCE RARITY COLORS FOR CREATURES
+========================= */
+
+/* Monster info panel */
+#monsterInfo.rarity-common       { border-color: #7a7a7a !important; }
+#monsterInfo.rarity-rare         { border-color: #2d8bff !important; }
+#monsterInfo.rarity-epic         { border-color: #b05cff !important; }
+#monsterInfo.rarity-legendary    { border-color: rgba(255,208,0,0.95) !important; }
+
+/* Monster sprite panel */
+#monsterSpritePanel.rarity-common    { border-color: #7a7a7a !important; }
+#monsterSpritePanel.rarity-rare      { border-color: #2d8bff !important; }
+#monsterSpritePanel.rarity-epic      { border-color: #b05cff !important; }
+#monsterSpritePanel.rarity-legendary { border-color: rgba(255,208,0,0.95) !important; }
+
+/* Ensure borders are solid (not dashed) */
+#monsterInfo,
+#monsterSpritePanel{
+  border-style: solid;
 }
